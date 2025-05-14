@@ -37,7 +37,7 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('GOOGLE_REDIRECT_URI'),
+        'redirect' => 'https://quickpost.laravel.cloud/api/oauth/youtube/callback',
     ],
     'youtube' => [
         'client_id' => env('GOOGLE_OAUTH_CLIENT_ID'),
