@@ -46,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->stateless()
             ->redirect();
     });
+    
 
     Route::get('/oauth/facebook/redirect', function () {
         return Socialite::driver('facebook')
