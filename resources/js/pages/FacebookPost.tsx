@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-export default function Instagram() {
+export default function FacebookPost() {
     const [pages, setPages] = useState([]);
     const [selectedPage, setSelectedPage] = useState('');
     const [message, setMessage] = useState('');

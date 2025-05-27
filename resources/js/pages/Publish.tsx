@@ -57,10 +57,10 @@ export default function Publish({ channels }) {
                         <path d="M10 0C4.477 0 0 4.477 0 10c0 5.523 4.477 10 10 10 5.523 0 10-4.477 10-10 0-5.523-4.477-10-10-10zm3.7 10.334l-4.2 2.4c-.4.2-.7-.1-.7-.5V7.666c0-.4.3-.7.7-.5l4.2 2.4c.4.2.4.7 0 .9z" />
                     </svg>
                 );
-            case 'tiktok':
+            case 'twitter':
                 return (
-                    <svg className="mr-3 h-5 w-5 text-black" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10 0C4.477 0 0 4.477 0 10c0 5.523 4.477 10 10 10 5.523 0 10-4.477 10-10 0-5.523-4.477-10-10-10zm3.7 10.334l-4.2 2.4c-.4.2-.7-.1-.7-.5V7.666c0-.4.3-.7.7-.5l4.2 2.4c.4.2.4.7 0 .9z" />
+                    <svg className="mr-3 h-5 w-5 text-black" viewBox="0 0 1200 1227" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M715 522L1145 0H1040L660 460 355 0H0L460 667 0 1227H105L515 737 845 1227H1200L715 522Z" />
                     </svg>
                 );
             default:
@@ -114,7 +114,7 @@ export default function Publish({ channels }) {
                                 channels.map((channel) => (
                                     <div
                                         key={channel.id}
-                                        className={`flex relative items-center justify-between rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 ${
+                                        className={`relative flex items-center justify-between rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 ${
                                             selectedChannel === channel.id ? 'bg-gray-50' : ''
                                         }`}
                                     >
@@ -130,7 +130,7 @@ export default function Publish({ channels }) {
                                             <button
                                                 onClick={() => handleDisconnect(channel.id)}
                                                 disabled={disconnecting}
-                                                className={`ml-2 absolute top-12 left-12 rounded-md px-3 py-1 text-sm transition-colors ${
+                                                className={`absolute top-12 left-12 ml-2 rounded-md px-3 py-1 text-sm transition-colors ${
                                                     disconnecting
                                                         ? 'cursor-not-allowed text-gray-400'
                                                         : 'text-red-600 hover:bg-red-50 hover:text-red-800'
@@ -199,7 +199,7 @@ export default function Publish({ channels }) {
                                 </button>
                             </div>
                         ) : (
-                            <PostPage />
+                            <PostPage channels={channels}/>
                         )}
                     </div>
                 </div>

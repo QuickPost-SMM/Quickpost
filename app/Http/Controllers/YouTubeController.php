@@ -67,23 +67,24 @@ class YouTubeController extends Controller
             $request->validate([
                 'title' => 'required|string',
                 'description' => 'nullable|string',
-                'file' => 'required|file|mimetypes:video/mp4,video/x-m4v,video/*',
-                'scheduledAt' => [
-                    'nullable',
-                    'date_format:Y-m-d\TH:i:s.000\Z',
-                    function ($attribute, $value, $fail) {
-                        $minTime = now()->addMinutes(15);
-                        $scheduledTime = \Carbon\Carbon::parse($value);
+                'file'=>'required',
+                // 'file' => 'required|file|mimetypes:video/mp4,video/x-m4v,video/*',
+                // 'scheduledAt' => [
+                //     'nullable',
+                //     'date_format:Y-m-d\TH:i:s.000\Z',
+                //     function ($attribute, $value, $fail) {
+                //         $minTime = now()->addMinutes(15);
+                //         $scheduledTime = \Carbon\Carbon::parse($value);
 
-                        if ($scheduledTime < $minTime) {
-                            $fail('The scheduled time must be at least 15 minutes in the future.');
-                        }
+                //         if ($scheduledTime < $minTime) {
+                //             $fail('The scheduled time must be at least 15 minutes in the future.');
+                //         }
 
-                        if ($scheduledTime > now()->addMonths(6)) {
-                            $fail('The scheduled time cannot be more than 6 months in the future.');
-                        }
-                    }
-                ]
+                //         if ($scheduledTime > now()->addMonths(6)) {
+                //             $fail('The scheduled time cannot be more than 6 months in the future.');
+                //         }
+                //     }
+                // ]
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Illuminate\Support\Facades\Log::error('Validation failed:', $e->errors());
@@ -93,7 +94,8 @@ class YouTubeController extends Controller
         $user = $request->user();
         $youtube = $this->getYouTubeClient($user);
 
-        $videoPath = $request->file('file')->getPathname();
+        // $videoFile = $request->file('file');
+        $videoPath = $request->file;
 
         // Prepare video snippet
         $videoSnippet = new \Google_Service_YouTube_VideoSnippet();
@@ -105,12 +107,14 @@ class YouTubeController extends Controller
         $status = new \Google_Service_YouTube_VideoStatus();
 
         // Set privacy status based on scheduling
-        if ($request->has('scheduledAt')) {
-            $status->setPrivacyStatus('private'); // Must be private for scheduled videos
-            $status->setPublishAt($request->scheduledAt);
-        } else {
-            $status->setPrivacyStatus('public'); // or 'private', 'unlisted'
-        }
+        // if ($request->has('scheduledAt')) {
+        //     $status->setPrivacyStatus('private'); // Must be private for scheduled videos
+        //     $status->setPublishAt($request->scheduledAt);
+        // } else {
+        //     $status->setPrivacyStatus('public'); // or 'private', 'unlisted'
+        // }
+        
+        $status->setPrivacyStatus('public');
 
         $video = new \Google_Service_YouTube_Video();
         $video->setSnippet($videoSnippet);
@@ -169,13 +173,11 @@ class YouTubeController extends Controller
             ]);
 
         } catch (\Google_Service_Exception $e) {
-            \Log::error('YouTube API Error: ' . $e->getMessage());
             return response()->json([
                 'message' => 'YouTube API error',
                 'errors' => json_decode($e->getMessage(), true)
             ], 500);
         } catch (\Exception $e) {
-            \Log::error('Upload Error: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Upload failed',
                 'error' => $e->getMessage()

@@ -8,6 +8,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SocialAccountController;
 use App\Http\Controllers\TiktokController;
+use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\YouTubeController;
 use App\Http\Controllers\SocialAuthController;
 use App\Models\SocialAccount;
@@ -23,6 +24,9 @@ Route::get('/', [LandingPageController::class, 'index'])->name('home');
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/posts/data', [PostController::class, 'index']);
+
+    Route::post('/api/publish', [PostController::class, 'publish']);
+
     Route::get('/posts/schedule', function () {
         return Inertia::render('Post');
     });
@@ -46,7 +50,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->stateless()
             ->redirect();
     });
-    
+
+
+    Route::get('/post/facebook', function () {
+        return Inertia::render('FacebookPost');
+    });
+
+    Route::get('/api/oauth/twitter/redirect', function () {
+        return Socialite::driver('twitter')->redirect();
+    });
+
+    Route::get('/api/oauth/twitter/callback', function () {
+        $twitterUser = Socialite::driver('twitter')->user();
+
+        $user = auth()->user();
+        $user->socialAccounts()->updateOrCreate([
+            'platform' => 'twitter',
+        ], [
+            'platform_user_id' => $twitterUser->getId(),
+            'access_token' => $twitterUser->token,
+            'refresh_token' => $twitterUser->refreshToken,
+            'name' => $twitterUser->getName(),
+            'username' => $twitterUser->getNickname(),
+            'avatar' => $twitterUser->getAvatar(),
+        ]);
+        return redirect('/post/publish')->with('success', 'X account connected!');
+    });
 
     Route::get('/oauth/facebook/redirect', function () {
         return Socialite::driver('facebook')
@@ -64,6 +93,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->with(['state' => auth()->id()])
             ->redirect();
     });
+    Route::post('/api/twitter/post',[TwitterController::class,'postToTwitter']);
+
 
     Route::get('/oauth/facebook/callback', function () {
         try {

@@ -42,7 +42,7 @@ class FacebookController extends Controller
             return response()->json(['error' => 'No connected Facebook account'], 404);
         }
 
-        // // Get page access token
+        // Get page access token
         $pages = Http::get("https://graph.facebook.com/v19.0/me/accounts", [
             'access_token' => $account->access_token,
         ]);
