@@ -26,6 +26,7 @@ const youtubeUploadSchedule = () => {
     return (
         <div>
             <h2>Upload YouTube Video</h2>
+            <div></div>
             <input type="text" placeholder="Title" onChange={(e) => setTitle(e.target.value)} />
             <textarea placeholder="Description" onChange={(e) => setDescription(e.target.value)} />
             <input type="file" accept="video/*" onChange={(e) => setFile(e.target.files[0])} />
