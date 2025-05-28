@@ -25,6 +25,7 @@ const X = () => {
         onChange={(e) => setMessage(e.target.value)}
       />
       <button onClick={postToTwitter}>Post</button>
+      <div></div>
     </div>
   );
 };
