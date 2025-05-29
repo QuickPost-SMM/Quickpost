@@ -16,6 +16,10 @@ use Google_Http_MediaFileUpload;
 
 class PostController extends Controller
 {
+    public function index(){
+        $posts = Post::where('user_id', auth()->id())->latest()->get();
+        return response()->json($posts);
+    }
     public function publish(Request $request)
     {
         // Validate common fields
