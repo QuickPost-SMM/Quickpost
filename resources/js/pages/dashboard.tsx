@@ -70,9 +70,9 @@ export default function Dashboard() {
                 const resContent =  await axios.get('/contents');
                 const resPosts = await axios.get('/posts/data');
                 
-                // console.log(resPosts.data);
-                // console.log(response.data);
-                // console.log(resContent.data.length);
+                console.log(resPosts.data);
+                console.log(response.data);
+                console.log(resContent.data.length);
                 
                 setContent(resContent.data.length);
                 setAccounts(response.data.channels || []);
