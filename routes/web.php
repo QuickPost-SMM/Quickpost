@@ -232,7 +232,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 
-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/contents/create', function () {
         return Inertia::render('CreateContent');
@@ -240,6 +239,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/contents', [ContentController::class, 'index'])->name('contents.index');
     Route::post('/contents', [ContentController::class, 'store'])->name('contents.store');
+    Route::put('/contents/{content}', [ContentController::class, 'update']);
     Route::delete('/contents/{id}', [ContentController::class, 'destroy']);
     Route::post('/api/ai/generate', [AIContentController::class, 'generate'])->name('generate.content');
     Route::get('/contents/generate', function () {
