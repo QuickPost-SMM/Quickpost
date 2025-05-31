@@ -12,11 +12,8 @@ class Content extends Model
 
     public function getMediaUrlAttribute()
     {
-        if (!$this->media_url) {
-            return null;
-        }
-
-        return Storage::disk('public')->url($this->media_url);
+        $mediaUrl = $this->getRawOriginal('media_url');
+        return $mediaUrl ? Storage::disk('public')->url($mediaUrl) : null;
     }
 
     public function getFileTypeAttribute()
