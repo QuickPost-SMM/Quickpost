@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\ScheduledPost;
 use App\Models\SocialAccount;
+use App\Jobs\ProcessScheduledPost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +18,8 @@ use Google_Http_MediaFileUpload;
 
 class PostController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         $posts = Post::where('user_id', auth()->id())->latest()->get();
         return response()->json($posts);
     }
@@ -33,6 +36,28 @@ class PostController extends Controller
             'image' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif'
         ]);
 
+        try {
+            // Handle immediate publishing
+            if (!$request->has('scheduledAt')) {
+                return $this->publishImmediately($request);
+            }
+
+            // Handle scheduled publishing
+            return $this->schedulePost($request);
+
+        } catch (\Exception $e) {
+            Log::error('Publish failed: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Publish failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+
+
+    }
+
+    protected function publishImmediately(Request $request)
+    {
         // Additional validation for YouTube
         if (in_array('youtube', $request->platforms)) {
             $request->validate([
@@ -94,6 +119,40 @@ class PostController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    protected function schedulePost(Request $request)
+    {
+        // Store files temporarily
+        $imagePath = $request->hasFile('image')
+            ? $request->file('image')->store('scheduled-posts', 'public')
+            : null;
+
+        $videoPath = $request->hasFile('file')
+            ? $request->file('file')->store('scheduled-posts', 'public')
+            : null;
+
+        $scheduledPost = ScheduledPost::create([
+            'user_id' => $request->user()->id,
+            'platforms' => json_encode($request['platforms']), 
+            'facebook_page_id' => $request->facebook_page_id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'image_path' => $imagePath,
+            'video_path' => $videoPath,
+            'scheduled_at' => \Carbon\Carbon::parse($request->scheduledAt),
+            'status' => 'scheduled',
+        ]);
+
+        // Dispatch job to process at scheduled time
+        ProcessScheduledPost::dispatch($scheduledPost)
+            ->delay($scheduledPost->scheduled_at);
+
+        return response()->json([
+            'message' => 'Post scheduled successfully',
+            'scheduled_at' => $scheduledPost->scheduled_at,
+            'post_id' => $scheduledPost->id
+        ]);
     }
 
     protected function publishToYouTube(Request $request)
