@@ -62,10 +62,10 @@ class ContentController extends Controller
     public function update(Request $request, Content $content)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'required|string',
             'description' => 'nullable|string',
             'status' => 'required|string',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,gif,mp4,mov,pdf,doc,docx|max:20480',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,gif,mp4,mov',
         ]);
 
         if ($request->hasFile('file')) {
