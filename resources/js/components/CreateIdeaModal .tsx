@@ -7,11 +7,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import axios from 'axios';
 import { Check, ChevronDown, ChevronUp, Copy, ImageIcon, SmileIcon, Wand2, X } from 'lucide-react';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 
-interface CreateIdeaModalProps {
-    open: boolean;
-    onClose: () => void;
-}
 interface AIAssistantProps {
     onClose: () => void;
     onApply: (content: string) => void;
@@ -158,24 +155,6 @@ function AIAssistant({ onClose, onApply, initialContent = '' }: AIAssistantProps
                     {isGenerating ? 'Generating...' : 'Generate Content'}
                 </Button>
 
-                {/* {response && (
-                    <div className="rounded-md border bg-gray-50 p-4">
-                        <div className="mb-3 flex items-center justify-between">
-                            <h3 className="font-medium">AI Suggestion</h3>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="sm" onClick={copyToClipboard} className="h-8 w-8 p-0">
-                                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>{copied ? 'Copied!' : 'Copy to clipboard'}</TooltipContent>
-                            </Tooltip>
-                        </div>
-                        <div className="prose prose-sm max-w-none">
-                            <p className="whitespace-pre-wrap">{response}</p>
-                        </div>
-                    </div>
-                )} */}
                 {response && (
                     <div className="rounded-md border bg-gray-50 p-4">
                         <div className="mb-3 flex items-center justify-between">
@@ -220,15 +199,31 @@ function AIAssistant({ onClose, onApply, initialContent = '' }: AIAssistantProps
     );
 }
 
-export default function CreateIdeaModal({ open, onClose }: CreateIdeaModalProps) {
-    const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
-    const [status, setStatus] = useState('unassigned');
+interface CreateIdeaModalProps {
+    open: boolean;
+    onClose: () => void;
+    contentToEdit?: Content | null; // Add this prop
+}
+
+export default function CreateIdeaModal({ open, onClose, contentToEdit }: CreateIdeaModalProps) {
+    const [title, setTitle] = useState(contentToEdit?.title || '');
+    const [content, setContent] = useState(contentToEdit?.description || '');
+    const [status, setStatus] = useState(contentToEdit?.status || 'unassigned');
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [showAIAssistant, setShowAIAssistant] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (open) {
+            setTitle(contentToEdit?.title || '');
+            setContent(contentToEdit?.description || '');
+            setStatus(contentToEdit?.status || 'unassigned');
+            setFile(null);
+            setPreviewUrl(contentToEdit?.media_url || null);
+        }
+    }, [open, contentToEdit]);
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -244,32 +239,45 @@ export default function CreateIdeaModal({ open, onClose }: CreateIdeaModalProps)
     };
 
     const handleSave = async () => {
+        // Validate required fields before submission
         if (!title) {
             alert('Title is required');
             return;
         }
-
+        if (!status) {
+            alert('Status is required');
+            return;
+        }
+    
         setIsUploading(true);
         try {
             const formData = new FormData();
             formData.append('title', title);
             formData.append('description', content);
-            formData.append('status', status);
+            formData.append('status', status); // Ensure status is included
+            
             if (file) {
                 formData.append('file', file);
             }
+    
+            const url = contentToEdit ? `/contents/${contentToEdit.id}` : '/contents';
+            const method = contentToEdit ? 'put' : 'post';
 
-            await axios.post('/contents', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-
-            resetForm();
+            
+    
+            await axios[method](url, formData);
+    
             onClose();
         } catch (error) {
-            console.error('Failed to save content:', error);
-            alert('Failed to save content. Please try again.');
+            console.error('Save failed:', error);
+            // Show validation errors from backend
+            if (error.response?.data?.errors) {
+                Object.values(error.response.data.errors).forEach(messages => {
+                    messages.forEach((message: string) => toast.error(message));
+                });
+            } else {
+                toast.error('Failed to save content');
+            }
         } finally {
             setIsUploading(false);
         }

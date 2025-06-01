@@ -144,7 +144,6 @@ class PostController extends Controller
             'status' => 'scheduled',
         ]);
 
-        // Dispatch job to process at scheduled time
         ProcessScheduledPost::dispatch($scheduledPost)
             ->delay($scheduledPost->scheduled_at);
 

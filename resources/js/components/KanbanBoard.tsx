@@ -1,10 +1,12 @@
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import { Edit3, PlusCircle, Trash2 } from 'lucide-react';
-import TaskCard from './TaskCard';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
+import CreateIdeaModal from './CreateIdeaModal ';
+import { TaskCard } from './TaskCard';
 
-type Contents = {
+type Content = {
     id: string;
     title: string;
     description: string;
@@ -14,16 +16,24 @@ type Contents = {
 type Column = {
     id: string;
     title: string;
-    tasks: Contents[];
+    tasks: Content[];
 };
 
 interface KanbanBoardProps {
-    contents: Contents[];
+    contents: Content[];
     onNewIdea: () => void;
 }
 
 export default function KanbanBoard({ contents, onNewIdea }: KanbanBoardProps) {
     // Define static columns that will always appear
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [contentToEdit, setContentToEdit] = useState<Content | null>(null);
+
+    const handleEditClick = (content: Content) => {
+        setContentToEdit(content);
+        setIsEditModalOpen(true);
+    };
+
     const staticColumns = [
         { id: 'unassigned', title: 'Unassigned' },
         { id: 'to-do', title: 'Todo' },
@@ -36,18 +46,16 @@ export default function KanbanBoard({ contents, onNewIdea }: KanbanBoardProps) {
         tasks: contents.filter((task) => task.status === column.id),
     }));
 
-    const handleEditTask = (content : Contents[]) => {
-        
-    };
+    const handleEditTask = (content: Content[]) => {};
 
-    const handleDeleteTask = async ( taskId: string) => {
+    const handleDeleteTask = async (taskId: string) => {
         if (window.confirm('Are you sure you want to delete this content?')) {
             try {
                 await axios.delete(`/contents/${taskId}`);
 
                 console.log('deleted');
                 toast.success('Content deleted successfully');
-                window.location.reload(); 
+                window.location.reload();
             } catch (error) {
                 console.error('Delete error:', error);
                 toast.error(error.response?.data?.message || 'Failed to delete content');
@@ -69,18 +77,17 @@ export default function KanbanBoard({ contents, onNewIdea }: KanbanBoardProps) {
                     <div className="flex-1 space-y-4">
                         {column.tasks.map((task) => (
                             <div key={task.id} className="relative">
-                                <TaskCard task={task} />
+                                <TaskCard task={task} onClick={() => handleEditClick(task)} />
                                 <div className="absolute top-2 right-2 flex gap-2">
-                                    {/* <Button variant="ghost" size="icon" onClick={() => handleEditTask(column)}>
+                                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(task)}>
                                         <Edit3 className="h-4 w-4" />
-                                    </Button> */}
-                                    <Button variant="ghost" size="icon" onClick={() => handleDeleteTask( task.id )}>
+                                    </Button>
+                                    <Button variant="ghost" size="icon" onClick={() => handleDeleteTask(task.id)}>
                                         <Trash2 className="h-4 w-4 text-red-500" />
                                     </Button>
                                 </div>
                             </div>
                         ))}
-
                         <Button variant="ghost" className="w-full justify-start bg-white" onClick={onNewIdea}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             New Idea
@@ -88,6 +95,7 @@ export default function KanbanBoard({ contents, onNewIdea }: KanbanBoardProps) {
                     </div>
                 </div>
             ))}
+            <CreateIdeaModal open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} contentToEdit={contentToEdit} />
         </div>
     );
 }

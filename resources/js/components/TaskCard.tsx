@@ -13,16 +13,16 @@ type TaskProps = {
     };
 };
 
-export default function TaskCard({ task }: TaskProps) {
-
+export function TaskCard({ task, onClick }) {
     return (
-        <Card className="border-0 bg-blue-100 text-black">
-            <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                    <h4 className="mb-2 font-medium">{task.title}</h4>
-                </div>
-                <p className="text-muted-foreground text-sm">{task.description}</p>
-            </CardContent>
-        </Card>
+        <div 
+            className="cursor-pointer rounded border p-4 hover:bg-gray-50"
+            onClick={onClick}
+        >
+            <h4 className="font-medium">{task.title}</h4>
+            {task.description && (
+                <p className="mt-2 text-sm text-gray-600">{task.description}</p>
+            )}
+        </div>
     );
 }

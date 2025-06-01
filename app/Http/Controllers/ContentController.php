@@ -59,38 +59,46 @@ class ContentController extends Controller
     }
 
 
-    public function update(Request $request, Content $content)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'title' => 'required|string',
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|string',
+            'status' => 'required',
             'file' => 'nullable|file|mimes:jpg,jpeg,png,gif,mp4,mov',
         ]);
 
-        if ($request->hasFile('file')) {
-            // Delete old file if exists
-            if ($content->media_url) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($content->media_url);
+        try {
+            $content = Content::findOrFail($id);
+            $filePath = $content->media_url;
+
+            if ($request->hasFile('file')) {
+                // Delete old file if exists
+                if ($content->media_url) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($content->media_url);
+                }
+
+                $file = $request->file('file');
+
+                // Generate safe filename with timestamp and original extension
+                $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9\.\-]/', '_', $file->getClientOriginalName());
+
+                // Store file in public storage
+                $filePath = $file->storeAs('uploads', $fileName, 'public');
             }
 
-            $file = $request->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('uploads', $fileName, 'public');
+            $content->update([
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'media_url' => $filePath,
+                'status' => $validated['status'],
+            ]);
 
-            $content->file_path = $filePath;
+            return redirect()->back()->with('success', 'Content updated successfully');
+
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
-
-        $content->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'status' => $request->status,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'data' => $content,
-        ]);
     }
 
     public function destroy($id)
