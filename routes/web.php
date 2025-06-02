@@ -41,7 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('X');
     });
 
-    Route::get('/api/facebook/pages', [FacebookController::class, 'getFacebookPages']);
+    Route::get('/api/facebook/pages', [FacebookController::class, 'pages']);
     Route::post('/api/facebook/post', [FacebookController::class, 'publishToFacebook']);
     Route::get('/api/facebook/{pageId}/posts', [FacebookController::class, 'getFacebookPosts']);
     Route::get('/api/facebook/{pageId}/analytics', [FacebookController::class, 'FacebookAnalytics']);

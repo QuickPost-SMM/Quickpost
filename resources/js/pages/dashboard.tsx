@@ -1,22 +1,3 @@
-// import Appearance from './settings/appearance';
-
-// export default function Dashboard() {
-//     return (
-//         <>
-//             <div
-//                 onClick={() => {
-//                     window.location.href = '/api/oauth/youtube/redirect';
-//                 }}
-//             >
-//                   Connect YouTube
-//             </div>
-//             <div>
-//                 <Appearance />
-//             </div>
-//         </>
-//     );
-// }
-
 import AnalyticsOverview from '@/components/Analytics-overview';
 import AnalyticsCard from '@/components/AnalyticsCard';
 import PlatformDistribution from '@/components/PlatformDistribution';
@@ -61,48 +42,48 @@ interface SocialAccount {
 
 export default function Dashboard() {
     const [accounts, setAccounts] = useState<SocialAccount[]>([]);
-    const [content , setContent] = useState(0);
-    const [posts , setPosts] = useState(0);
+    const [content, setContent] = useState(0);
+    const [posts, setPosts] = useState([]);
     useEffect(() => {
         const fetchConnectedAccounts = async () => {
             try {
                 const response = await axios.get('/social/accounts'); // Adjust endpoint as needed
-                const resContent =  await axios.get('/contents');
+                const resContent = await axios.get('/contents');
                 const resPosts = await axios.get('/posts/data');
-                
+
                 console.log(resPosts.data);
                 console.log(response.data);
-                console.log(resContent.data.length);
-                
+                console.log(resContent.data);
+
                 setContent(resContent.data.length);
                 setAccounts(response.data.channels || []);
-                setPosts(resPosts.data.length);
+                setPosts(resPosts.data);
             } catch (err) {
-               console.log(err.response?.data?.message || err.message || 'Failed to fetch connected accounts');
+                console.log(err.response?.data?.message || err.message || 'Failed to fetch connected accounts');
             } finally {
             }
         };
 
         fetchConnectedAccounts();
     }, []);
-    const platformData = [
-        {
-            name: 'YouTube',
-            value: 680,
-        },
-        {
-            name: 'Facebook',
-            value: 300,
-        },
-        {
-            name: 'Instagram',
-            value: 200,
-        },
-        {
-            name: 'TikTok',
-            value: 150,
-        },
-    ];
+    // const platformData = [
+    //     {
+    //         name: 'YouTube',
+    //         value: 680,
+    //     },
+    //     {
+    //         name: 'Facebook',
+    //         value: 300,
+    //     },
+    //     {
+    //         name: 'Instagram',
+    //         value: 200,
+    //     },
+    //     {
+    //         name: 'TikTok',
+    //         value: 150,
+    //     },
+    // ];
 
     const { flash } = usePage().props as { flash: { error?: string; success?: string } };
 
@@ -118,15 +99,12 @@ export default function Dashboard() {
 
     return (
         <NavBar title={'Dashboard'}>
-        
             <Head title="Dashboard" />
-            <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <AnalyticsCard title="Total Posts using QuickPost" value={posts} icon="FileText" trend={5} />
+            <div className="mb-6 grid grid-cols-1 justify-between gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <AnalyticsCard title="Total Posts using QuickPost" value={posts.length} icon="FileText" trend={5} />
                 <AnalyticsCard title="Total Contents" value={content} icon="Calendar" trend={2} />
-                <AnalyticsCard title="Total Engagement" value={22} icon="Heart" trend={8} />
                 <AnalyticsCard title="Connected Channels" value={accounts.length} icon="TrendingUp" trend={3} />
             </div>
-
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <div className="lg:col-span-2">
                     <div className="mb-6 rounded-lg bg-white p-6 shadow">
@@ -136,16 +114,16 @@ export default function Dashboard() {
 
                     <div className="rounded-lg bg-white p-6 shadow">
                         <h2 className="mb-4 text-lg font-medium text-gray-900">Platform Distribution</h2>
-                        <PlatformDistribution data={platformData} />
+                        <PlatformDistribution posts={posts} />
                     </div>
                 </div>
 
                 <div>
                     <SocialAccountsOverview />
-                    <div className="mb-3 rounded-lg bg-white p-6 shadow mt-2.5">
+                    {/* <div className="mt-2.5 mb-3 rounded-lg bg-white p-6 shadow">
                         <h2 className="mb-4 text-lg font-medium text-gray-900">Quick Post</h2>
                         <QuickPost />
-                    </div>
+                    </div> */}
                     <AnalyticsOverview />
                 </div>
             </div>

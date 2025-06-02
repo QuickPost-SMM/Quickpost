@@ -15,11 +15,15 @@ class AIContentController extends Controller
         ]);
     
         // Enhanced prompt with social media expert context
-        $enhancedPrompt = "You are a social media expert. " .
-            "The user is creating content for their social media channels. " .
-            "Please help them refine this idea into an engaging social media post. " .
-            "User's input: " . $request->prompt . " " .
-            "Provide a well-structured post with appropriate hashtags and emojis if relevant.";
+        $enhancedPrompt = "Act as a top social media strategist. Analyze the user's input and generate a viral-worthy post that will:
+        1. First line: Hook attention with a bold statement/question
+        2. Second line: Add context or problem identification
+        3. Third line: Provide value/solution (educational, entertaining or inspiring)
+        4. Fourth line: Include social proof or credibility element if relevant
+        5. Fifth line: Call-to-action (engagement prompt)
+        6. Sixth line: 3-5 relevant hashtags and 1-2 emojis
+        
+        Keep it platform-agnostic but optimized for Instagram/LinkedIn/TikTok. The user's input is: " . $request->prompt;
     
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',

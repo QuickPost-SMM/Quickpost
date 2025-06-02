@@ -66,9 +66,7 @@ export default function ConnectedAccountsPage({ channels = [] }: ConnectedAccoun
     try {
       const response = await axios.delete(`/channels/${accountId}`);
       
-      if (response.status === 200) {
-        window.location.reload();
-      }
+      window.location.reload();
     } catch (error) {
       console.error('Disconnect failed:', error);
     }

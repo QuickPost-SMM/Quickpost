@@ -11,6 +11,7 @@ export default function NavBar({ title, children }) {
         { name: 'Dashboard', href: '/dashboard', icon: Home },
         { name: 'Create Content', href: '/contents/create', icon: PenTool },
         { name: 'Publish Post', href: '/post/publish', icon: Calendar },
+        { name: 'Posts', href: '/posts', icon: Menu },
         { name: 'Connected Accounts', href: '/connected-accounts', icon: Share2 },
         { name: 'Analytics', href: '/analytics', icon: BarChart2 },
         { name: 'Settings', href: '/settings/profile', icon: Settings },
