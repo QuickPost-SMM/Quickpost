@@ -68,6 +68,8 @@ class ContentController extends Controller
             'file' => 'nullable|file|mimes:jpg,jpeg,png,gif,mp4,mov',
         ]);
 
+        
+
         try {
             $content = Content::findOrFail($id);
             $filePath = $content->media_url;
