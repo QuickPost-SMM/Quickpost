@@ -10,13 +10,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "abraham/twitteroauth": "^7.0",
-        "atymic/twitter": "^1.1",
+        "atymic/twitter": "^3.4",
         "google/apiclient": "^2.18",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
-        "laravel/socialite": "^5.20",
+        "laravel/socialite": "^5.21",
         "laravel/tinker": "^2.10.1",
+        "socialiteproviders/twitter": "^4.1",
         "tightenco/ziggy": "^2.4"
     },
     "require-dev": {

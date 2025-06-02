@@ -1,33 +1,10 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import TwitterPostForm from "@/components/TwitterPostForm";
 
-const X = () => {
-  const [message, setMessage] = useState('');
-
-  const postToTwitter = async () => {
-    try {
-      const res = await axios.post('/api/twitter/post', { message });
-      alert('Tweet posted successfully!');
-      setMessage('');
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to post tweet');
-    }
-  };
-
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>Post to Twitter</h2>
-      <textarea
-        rows={3}
-        style={{ width: '100%', marginBottom: 10 }}
-        placeholder="Type your tweet here..."
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
-      <button onClick={postToTwitter}>Post</button>
-      <div></div>
-    </div>
-  );
-};
-
-export default X;
+export default function X() {
+    return (
+        <div className="max-w-2xl mx-auto p-4">
+            <h2 className="text-xl font-bold mb-4">Post to Twitter</h2>
+            <TwitterPostForm />
+        </div>
+    );
+}

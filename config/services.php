@@ -50,11 +50,11 @@ return [
         'redirect' => env('FACEBOOK_REDIRECT_URI'),
     ],
     'twitter' => [
-        'client_id' => env('TWITTER_CLIENT_ID'),
-        'client_secret' => env('TWITTER_CLIENT_SECRET'),
-        'redirect' => env('TWITTER_REDIRECT_URI'),
+        'client_id' => env('TWITTER_CONSUMER_KEY'),
+        'client_secret' => env('TWITTER_CONSUMER_SECRET'),
+        'redirect' => env('TWITTER_CALLBACK_URL'),
+        'access_token' => env('TWITTER_ACCESS_TOKEN'),
+        'access_token_secret' => env('TWITTER_ACCESS_TOKEN_SECRET'),
+        'bearer_token' => env('TWITTER_BEARER_TOKEN'),
     ],
-
-
-
 ];

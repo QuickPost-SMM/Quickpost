@@ -3,11 +3,51 @@
 namespace App\Http\Controllers;
 
 use App\Models\SocialAccount;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Services\TwitterService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 class TwitterController extends Controller
 {
     //
+
+
+    public function post(Request $request)
+    {
+        $request->validate([
+            'content' => 'required|string|max:280',
+            'media' => 'nullable|file|mimes:jpg,jpeg,png,gif,mp4|max:51200'
+        ]);
+
+        try {
+            $twitter = new TwitterService(auth()->id());
+
+            $mediaPath = null;
+            if ($request->hasFile('media')) {
+                $path = $request->file('media')->store('twitter-media');
+                $mediaPath = Storage::path($path);
+            }
+
+            $response = $twitter->postTweet(
+                $request->content,
+                $mediaPath
+            );
+
+            return response()->json([
+                'success' => true,
+                'tweet_id' => $response->data->id,
+                'url' => "https://twitter.com/user/status/{$response->data->id}"
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
     public function postToTwitter(Request $request)
     {
         $request->validate([

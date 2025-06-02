@@ -17,11 +17,13 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Redirect;
-
+use Atymic\Twitter\Facade\Twitter;
 
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+
+    Route::get('/connected-accounts', [SocialAccountController::class, 'ConnectedAccounts']);
 
     Route::get('/posts/data', [PostController::class, 'index']);
 
@@ -35,8 +37,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('Analytics');
     });
 
-    Route::get('/facebook', function () {
-        return Inertia::render('FacebookPages');
+    Route::get('/x', function () {
+        return Inertia::render('X');
     });
 
     Route::get('/api/facebook/pages', [FacebookController::class, 'getFacebookPages']);
@@ -56,9 +58,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('FacebookPost');
     });
 
-    Route::get('/api/oauth/twitter/redirect', function () {
+    Route::get('/api/twitter/redirect', function () {
         return Socialite::driver('twitter')->redirect();
     });
+    
+    // Route::get('/api/twitter/redirect', function () {
+    //     return Twitter::redirect();
+    // });
 
     Route::get('/api/oauth/twitter/callback', function () {
         $twitterUser = Socialite::driver('twitter')->user();
@@ -93,7 +99,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->with(['state' => auth()->id()])
             ->redirect();
     });
-    Route::post('/api/twitter/post',[TwitterController::class,'postToTwitter']);
+    Route::post('/api/twitter/post', [TwitterController::class, 'postToTwitter']);
+    Route::post('/twitter/post', [TwitterController::class, 'post']);
 
 
     Route::get('/oauth/facebook/callback', function () {
@@ -199,7 +206,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::get('/api/youtube/channel', [YouTubeController::class, 'showChannel']);
     Route::delete('/channels/{socialAccount}', [SocialAccountController::class, 'destroy'])
-        ->middleware(['auth'])
         ->name('channels.destroy');
 
     Route::post('/api/youtube/upload', [YouTubeController::class, 'uploadVideo']);

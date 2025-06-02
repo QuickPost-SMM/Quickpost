@@ -80,7 +80,7 @@ const socialMediaPlatforms = [
             </div>
         ),
         description: 'Account',
-        authUrl: '/api/oauth/twitter/redirect',
+        authUrl: '/api/twitter/redirect',
     },
 ];
 
@@ -88,7 +88,6 @@ export default function ConnectChannelModal({ isOpen, onClose }) {
     const router = usePage();
 
     const handlePlatformSelect = (platform) => {
-        // Close the modal
         onClose();
         window.location.href = platform.authUrl;
     };

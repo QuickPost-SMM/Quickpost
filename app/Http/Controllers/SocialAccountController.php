@@ -50,6 +50,27 @@ class SocialAccountController extends Controller
         ]);
     }
 
+    public function ConnectedAccounts(Request $request)
+    {
+        $channels = $request->user()
+            ->socialAccounts()
+            ->get(['id', 'platform', 'platform_user_id', 'name', 'email', 'avatar', 'created_at']);
+
+        return Inertia::render('ConnectedAccountsPage', [
+            'channels' => $channels->map(function ($account) {
+                return [
+                    'id' => $account->id,
+                    'platform' => $account->platform,
+                    'username' => $account->platform_user_id,
+                    'name' => $account->name,
+                    'email' => $account->email,
+                    'avatar' => $account->avatar,
+                    'connected_at' => $account->created_at->format('Y-m-d H:i:s'),
+                ];
+            })
+        ]);
+    }
+
     public function destroy(SocialAccount $socialAccount)
     {
 
@@ -63,7 +84,6 @@ class SocialAccountController extends Controller
 
             return back()->with([
                 'success' => 'Channel disconnected',
-                // Include fresh data if using partial reloads
                 'channels' => auth()->user()->socialAccounts
             ]);
 

@@ -8,6 +8,6 @@ use Inertia\Inertia;
 class LandingPageController extends Controller
 {
     public function index() {
-        return Inertia::render('Landing');
+        return Inertia::render('LandingPage');
     }
 }
