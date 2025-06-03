@@ -64,6 +64,8 @@ function AIAssistant({ onClose, onApply, initialContent = '' }: AIAssistantProps
             const result = await axios.post('/api/ai/generate', {
                 prompt: `As a social media expert, create engaging content about: ${prompt}`,
             });
+            console.log(result);
+
             setResponse(cleanResponse(result.data.content));
             setPromptHistory((prev) => [prompt, ...prev.slice(0, 4)]);
         } catch (error) {
@@ -169,12 +171,7 @@ function AIAssistant({ onClose, onApply, initialContent = '' }: AIAssistantProps
                             </Tooltip>
                         </div>
                         <div className="prose prose-sm max-w-none">
-                            <p className="overflow-hidden whitespace-pre-wrap">
-                                {getFirstLines(response)}
-                                {response.split('\n').length > 8 && (
-                                    <span className="mt-2 block text-sm text-gray-500">(Showing first 8 lines - copy to see full response)</span>
-                                )}
-                            </p>
+                            <p className="overflow-hidden whitespace-pre-wrap">{response}</p>
                         </div>
                     </div>
                 )}
@@ -215,7 +212,21 @@ export default function CreateIdeaModal({ open, onClose, contentToEdit }: Create
     const [showAIAssistant, setShowAIAssistant] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const normalizeMediaUrl = (url?: string | null) => {
+        if (!url) return null;
+        try {
+            const parsed = new URL(url);
+            if (parsed.hostname === 'localhost' && !parsed.port) {
+                parsed.port = '8000';
+            }
+            return parsed.toString();
+        } catch {
+            return url; // fallback to raw if invalid
+        }
+    };
+
     useEffect(() => {
+        setPreviewUrl(contentToEdit?.media_url ? normalizeMediaUrl(contentToEdit.media_url) : null);
         if (open) {
             setTitle(contentToEdit?.title || '');
             setContent(contentToEdit?.description || '');
@@ -248,31 +259,36 @@ export default function CreateIdeaModal({ open, onClose, contentToEdit }: Create
             alert('Status is required');
             return;
         }
-    
+
         setIsUploading(true);
         try {
             const formData = new FormData();
             formData.append('title', title);
             formData.append('description', content);
             formData.append('status', status); // Ensure status is included
-            
+
             if (file) {
                 formData.append('file', file);
             }
-    
-            const url = contentToEdit ? `/contents/${contentToEdit.id}` : '/contents';
-            const method = contentToEdit ? 'put' : 'post';
 
-            
-    
-            await axios[method](url, formData);
-    
+            const url = contentToEdit ? `/contents/${contentToEdit.id}` : '/contents';
+            if (contentToEdit) {
+                formData.append('_method', 'PUT');
+            }
+
+            // Always use POST
+            await axios.post(url, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
             onClose();
         } catch (error) {
             console.error('Save failed:', error);
             // Show validation errors from backend
             if (error.response?.data?.errors) {
-                Object.values(error.response.data.errors).forEach(messages => {
+                Object.values(error.response.data.errors).forEach((messages) => {
                     messages.forEach((message: string) => toast.error(message));
                 });
             } else {
@@ -341,20 +357,34 @@ export default function CreateIdeaModal({ open, onClose, contentToEdit }: Create
                             accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
                         />
 
-                        {previewUrl ? (
+                        {previewUrl || contentToEdit?.media_url ? (
                             <div className="relative">
-                                {file?.type.startsWith('image/') ? (
-                                    <img src={previewUrl} alt="Preview" className="max-h-60 w-full rounded-md object-contain" />
+                                {/* Handle Image */}
+                                {file?.type?.startsWith('image/') || contentToEdit?.media_url?.match(/\.(jpeg|jpg|png|gif|webp)$/i) ? (
+                                    <img
+                                        src={normalizeMediaUrl(contentToEdit?.media_url) || ''}
+                                        alt="Preview"
+                                        className="max-h-60 w-full rounded-md object-contain"
+                                    />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed p-8">
-                                        <p className="font-medium">{file?.name}</p>
-                                        <p className="text-sm text-gray-500">{file?.type || 'Unknown file type'}</p>
+                                        <p className="font-medium">{file?.name || contentToEdit?.media_url?.split('/').pop()}</p>
+                                        <p className="text-sm text-gray-500">{file?.type || 'Existing file'}</p>
+                                        <a
+                                            href={contentToEdit?.media_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 underline"
+                                        >
+                                            View file
+                                        </a>
                                     </div>
                                 )}
                                 <button
                                     onClick={() => {
                                         setFile(null);
                                         setPreviewUrl(null);
+                                        // If you want to clear the existing file reference too, you might reset media_url (up to you)
                                     }}
                                     className="absolute top-2 right-2 rounded-full bg-gray-800 p-1 text-white hover:bg-gray-700"
                                 >

@@ -73,6 +73,7 @@ class ContentController extends Controller
         try {
             $content = Content::findOrFail($id);
             $filePath = $content->media_url;
+            
 
             if ($request->hasFile('file')) {
                 // Delete old file if exists

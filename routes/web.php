@@ -245,6 +245,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/contents', [ContentController::class, 'index'])->name('contents.index');
     Route::post('/contents', [ContentController::class, 'store'])->name('contents.store');
+    Route::post('/contents/{content}', [ContentController::class, 'update'])->name('contents.update');
     Route::put('/contents/{content}', [ContentController::class, 'update'])->name('contents.update');
     Route::delete('/contents/{id}', [ContentController::class, 'destroy']);
     Route::post('/api/ai/generate', [AIContentController::class, 'generate'])->name('generate.content');

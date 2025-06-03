@@ -24,7 +24,7 @@ export default function GalleryView({ contents, onNewIdea }: GalleryViewProps) {
                             <div className="flex flex-col items-start gap-2">
                                 <span className="rounded-full bg-slate-100 px-2 py-1 text-xs">{idea.status}</span>
                                 <h1 className="text-left font-medium">{idea.title}</h1>
-                                <p className="text-muted-foreground text-left text-sm">{idea.description}</p>
+                                <p className="text-muted-foreground line-clamp-5 text-left text-sm">{idea.description}</p>
                             </div>
                         </CardContent>
                     </Card>

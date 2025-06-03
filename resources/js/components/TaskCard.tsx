@@ -14,6 +14,7 @@ type TaskProps = {
 };
 
 export function TaskCard({ task, onClick }) {
+    const [expanded, setExpanded] = useState(false);
     return (
         <div 
             className="cursor-pointer rounded border p-4 hover:bg-gray-50"
@@ -21,7 +22,17 @@ export function TaskCard({ task, onClick }) {
         >
             <h4 className="font-medium">{task.title}</h4>
             {task.description && (
-                <p className="mt-2 text-sm text-gray-600">{task.description}</p>
+                <div onClick={(e) => e.stopPropagation()}>
+                    <p className={`mt-2 text-sm text-gray-600 ${expanded ? '' : 'line-clamp-4'}`}>
+                        {task.description}
+                    </p>
+                    <button 
+                        className="text-xs text-blue-500 mt-1"
+                        onClick={() => setExpanded(!expanded)}
+                    >
+                        {expanded ? 'Show less' : 'Show more'}
+                    </button>
+                </div>
             )}
         </div>
     );
