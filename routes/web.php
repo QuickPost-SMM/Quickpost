@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AIContentController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\FacebookController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\TiktokController;
 use App\Http\Controllers\TwitterController;
 use App\Http\Controllers\YouTubeController;
 use App\Http\Controllers\SocialAuthController;
+use App\Http\Middleware\IsAdmin;
 use App\Models\SocialAccount;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -261,5 +263,50 @@ Route::get('/terms', function () {
 Route::get('/privacy', function () {
     return Inertia::render('privacy/privacy');
 });
+
+// Admin Routes
+Route::get('/admin', function() {
+    return redirect()->route('admin.dashboard');
+});
+
+Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
+    ->name('admin.dashboard')
+    ->middleware(['auth', IsAdmin::class]);
+
+Route::get('/admin/users', [AdminController::class, 'users'])
+    ->name('admin.users')
+    ->middleware(['auth', IsAdmin::class]);
+
+Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser'])
+    ->name('admin.users.delete')
+    ->middleware(['auth', IsAdmin::class]);
+
+Route::get('/admin/create', [AdminController::class, 'createAdmin'])
+    ->name('admin.createAdmin')
+    ->middleware(['auth', IsAdmin::class]);
+
+Route::post('/admin/create', [AdminController::class, 'storeAdmin'])
+    ->name('admin.storeAdmin')
+    ->middleware(['auth', IsAdmin::class]);
+
+Route::get('/admin/support', [AdminController::class, 'support'])
+    ->name('admin.support')
+    ->middleware(['auth', IsAdmin::class]);
+
+Route::delete('/admin/support/{id}', [AdminController::class, 'deleteSupport'])
+    ->name('admin.support.delete')
+    ->middleware(['auth', IsAdmin::class]);
+
+Route::post('/admin/support', [AdminController::class, 'storeSupport'])
+    ->name('admin.support.store');
+
+Route::get('/admin/subscriptions', [AdminController::class, 'subscription'])
+    ->name('admin.subscription')
+    ->middleware(['auth', IsAdmin::class]);
+
+Route::delete('/admin/subscription/{id}', [AdminController::class, 'deleteSubscription'])
+    ->name('admin.subscription.delete')
+    ->middleware(['auth', IsAdmin::class]);
+    
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

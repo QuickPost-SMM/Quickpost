@@ -34,6 +34,15 @@ class PaymentController extends Controller
         $response = Http::withToken($chapaSecretKey)->post($chapaUrl, $data);
 
         if ($response->successful()) {
+            $transaction = new \App\Models\Transaction();
+            $transaction->user_id = Auth::id();
+            $transaction->plan_name = $planName;
+            $transaction->amount = $planPrice;
+            $transaction->currency = 'ETB';
+            $transaction->transaction_ref = $data['tx_ref'];
+            $transaction->status = 'pending'; // Initial status
+            $transaction->save();
+
             $responseData = $response->json();
             return redirect($responseData['data']['checkout_url']);
         } else {
@@ -42,13 +51,13 @@ class PaymentController extends Controller
     }
 
     public function callback(Request $request) {
-        $transactionId = $request->input('transaction_id');
+        $trx_ref = $request->input('trx_ref');
         $status = $request->input('status');
 
-        if ($status === 'successful') {
-            return redirect()->route('home')->with('success', 'Payment successful!');
-        } else {
-            return redirect()->route('home')->withErrors(['error' => 'Payment failed.']);
-        }
+        \Illuminate\Support\Facades\DB::table('transactions')
+            ->where('transaction_ref', $trx_ref)
+            ->update(['status' => 'completed']);
+        
+        return redirect()->route('home')->with('success', 'Payment successful!');
     }
 }
